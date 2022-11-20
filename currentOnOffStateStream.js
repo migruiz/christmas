@@ -14,15 +14,25 @@ const masterSwitchSensor = new Observable(async subscriber => {
     });
   });
 
+
   const masterSwitchStream = masterSwitchSensor.pipe(
     filter( c=> c.action==='on' || c.action==='brightness_stop' || c.action==='brightness_move_up')
   )
 
-
+  const livingSwitchRoomStream = new Observable(async subscriber => {  
+    var mqttCluster=await mqtt.getClusterAsync()   
+    mqttCluster.subscribeData('zigbee2mqtt/0x84ba20fffea45342', function(content){   
+            subscriber.next(content)
+    });
+  });
+  
+  const offLivingRoomStream = livingSwitchRoomStream.pipe(
+    filter(c=> c.action==='brightness_stop' || c.action==='brightness_move_up')
+  )
 
 const initStream = of({action:'init', lightsTurnedOn:false})
 
-const currentOnOffStream = merge(masterSwitchStream,dayTimeStream,initStream).pipe(
+const currentOnOffStream = merge(masterSwitchStream,dayTimeStream,initStream,offLivingRoomStream).pipe(
     map((event) => {
         if (event.action==='init') return  {type:event.action, lightsTurnedOn:event.lightsTurnedOn}
         if (event.action==='off_alarm') return {type:event.action, lightsTurnedOn:event.lightsTurnedOn}
