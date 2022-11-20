@@ -2,27 +2,25 @@ const { Observable,merge } = require('rxjs');
 const { map } = require('rxjs/operators');
 const CronJob = require('cron').CronJob;
 
-const STARTFULLBRIGHTNESSATHOURS = parseInt(7)
-const ENDFULLBRIGHTNESSATHOURS = parseInt(20)
-const NIGHTBRIGHTNESS = parseInt(1)
-const DAYBRIGHTNESS = parseInt(6)
+const START = parseInt(16)
+const END = parseInt(22)
 
-const nightNotificationStream =  new Observable(subscriber => {      
+const endNotificationStream =  new Observable(subscriber => {      
     new CronJob(
-        `0 ${ENDFULLBRIGHTNESSATHOURS} * * *`,
+        `0 ${END} * * *`,
        function() {
-        subscriber.next({action:'night_time'});
+        subscriber.next({action:'on_alarm'});
        },
        null,
        true,
        'Europe/London'
    );
 });
-const dayNotificationStream =  new Observable(subscriber => {      
+const startNotificationStream =  new Observable(subscriber => {      
     new CronJob(
-        `0 ${STARTFULLBRIGHTNESSATHOURS} * * *`,
+        `0 ${START} * * *`,
        function() {
-           subscriber.next({action:'day_time'});
+           subscriber.next({action:'off_alarm'});
        },
        null,
        true,
@@ -30,14 +28,11 @@ const dayNotificationStream =  new Observable(subscriber => {
    );
 });
 
-const dayTimeStream = merge(nightNotificationStream,dayNotificationStream).pipe(
+const dayTimeStream = merge(endNotificationStream,startNotificationStream).pipe(
     map( (m) => {
-        if (m.action==='night_time') return { action:'date_time', value: NIGHTBRIGHTNESS}
-        if (m.action==='day_time') return { action:'date_time', value: DAYBRIGHTNESS}
+        if (m.action==='off_alarm') return { action:m.action, lightsTurnedOn: false}
+        if (m.action==='on_alarm') return { action:m.action, lightsTurnedOn: true}
         }
     )
 )
-const getDefaultBrightness = () => (new Date().getHours() > STARTFULLBRIGHTNESSATHOURS && new Date().getHours() < ENDFULLBRIGHTNESSATHOURS)? DAYBRIGHTNESS : NIGHTBRIGHTNESS
-
 module.exports.dayTimeStream =  dayTimeStream
-module.exports.getDefaultBrightness =  getDefaultBrightness

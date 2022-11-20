@@ -28,16 +28,15 @@ const livingRoomSensorStream = new Observable(async subscriber => {
 
 
 
-module.exports.getStream = function({lastEmissionOnOffStream}){
+module.exports.getMovementStream = function({lastEmissionOnOffStream}){
 
-    const sensorStreams = getMovementObservable(merge(groundfloorSensorStream, livingRoomSensorStream))
-    const sharedStreams = merge(sensorStreams).pipe(share())
+    const sensorSharedStreams = merge(groundfloorSensorStream, livingRoomSensorStream).pipe(share())
 
-    const lightsOffStream = sharedStreams.pipe(
+    const lightsOffStream = sensorSharedStreams.pipe(
         debounceTime(KEEPLIGHTONFORSECS),
         mapTo({type:'movement_off'}),
         )
-    const lightsOnStream = sharedStreams.pipe(
+    const lightsOnStream = sensorSharedStreams.pipe(
         mapTo({type:'movement_on'}),
     )
     
@@ -45,7 +44,7 @@ module.exports.getStream = function({lastEmissionOnOffStream}){
 
     return movementStream.pipe(
         withLatestFrom(lastEmissionOnOffStream),
-        map(([movement, OnOffState]) =>  ({type:movement.type, value: movement.type==='movement_on' ? OnOffState.lightsTurnedOn : false})),
+        map(([movement, onOffState]) =>  ({type:movement.type, lightsTurnedOn: movement.type==='movement_on' ? onOffState.lightsTurnedOn : false})),
     )
 
 }

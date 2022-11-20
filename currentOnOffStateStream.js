@@ -23,17 +23,17 @@ const masterSwitchSensor = new Observable(async subscriber => {
 
 
 const currentOnOffStream = merge(masterSwitchStream,dayTimeStream).pipe(
-    map((curr) => {
-        if (curr.action==='date_time') return {triggeredBy:'timeOfDay', lightsTurnedOn:curr.lightsTurnedOn}
-        if (curr.action==='on') return {triggeredBy:'device', lightsTurnedOn:true}
-        if (curr.action==='brightness_stop') return {triggeredBy:'device', lightsTurnedOn:false}
-        if (curr.action==='brightness_move_up') return {triggeredBy:'device', lightsTurnedOn:false }
-        return {triggeredBy:'init', lightsTurnedOn:false}
-        
+    map((event) => {
+        if (event.action==='off_alarm') return {type:event.action, lightsTurnedOn:event.lightsTurnedOn}
+        if (event.action==='on_alarm') return {type:event.action, lightsTurnedOn:event.lightsTurnedOn}
+        if (event.action==='on') return {type:event.action, lightsTurnedOn:true}
+        if (event.action==='brightness_stop') return {type:event.action, lightsTurnedOn:false}
+        if (event.action==='brightness_move_up') return {type:event.action, lightsTurnedOn:false }        
     }),
+    startWith({type:'init', lightsTurnedOn:false}),
     share()
 )
-const lastEmissionOnOFFStream = currentOnOffStream.pipe(shareReplay(1))
+const lastEmissionOnOffStream = currentOnOffStream.pipe(shareReplay(1))
 
 module.exports.currentOnOffStream =  currentOnOffStream
-module.exports.lastEmissionOnOFFStream =  lastEmissionOnOFFStream
+module.exports.lastEmissionOnOffStream =  lastEmissionOnOffStream
