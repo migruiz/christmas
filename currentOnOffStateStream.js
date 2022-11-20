@@ -23,13 +23,14 @@ const masterSwitchSensor = new Observable(async subscriber => {
 
 
 const currentOnOffStream = merge(masterSwitchStream,dayTimeStream).pipe(
-    scan((acc, curr) => {
+    map((curr) => {
         if (curr.action==='date_time') return {triggeredBy:'timeOfDay', lightsTurnedOn:curr.lightsTurnedOn}
         if (curr.action==='on') return {triggeredBy:'device', lightsTurnedOn:true}
         if (curr.action==='brightness_stop') return {triggeredBy:'device', lightsTurnedOn:false}
         if (curr.action==='brightness_move_up') return {triggeredBy:'device', lightsTurnedOn:false }
+        return {triggeredBy:'init', lightsTurnedOn:false}
         
-    }, {triggeredBy:'init', lightsTurnedOn:false}),
+    }),
     share()
 )
 const lastEmissionOnOFFStream = currentOnOffStream.pipe(shareReplay(1))
