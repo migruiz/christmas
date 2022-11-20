@@ -9,7 +9,7 @@ const endNotificationStream =  new Observable(subscriber => {
     new CronJob(
         `0 ${END} * * *`,
        function() {
-        subscriber.next({action:'on_alarm'});
+        subscriber.next({action:'off_alarm'});
        },
        null,
        true,
@@ -20,7 +20,7 @@ const startNotificationStream =  new Observable(subscriber => {
     new CronJob(
         `0 ${START} * * *`,
        function() {
-           subscriber.next({action:'off_alarm'});
+           subscriber.next({action:'on_alarm'});
        },
        null,
        true,
