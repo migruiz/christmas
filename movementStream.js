@@ -4,7 +4,7 @@ var mqtt = require('./mqttCluster.js');
 const GROUND_FLOOR_SENSOR_TOPIC = 'zigbee2mqtt/0x00158d000566c0cc'
 const LIOVING_ROOM_SENSOR_TOPIC = 'zigbee2mqtt/0x00156456'
 
-const KEEPLIGHTONFORSECS = parseInt(20 * 1000)
+const KEEPLIGHTONFORSECS = parseInt(20 * 60 * 1000)
 
 const groundfloorSensorStream = new Observable(async subscriber => {  
     var mqttCluster=await mqtt.getClusterAsync()   
