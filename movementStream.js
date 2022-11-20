@@ -2,9 +2,9 @@ const { Observable,merge,timer, interval, of } = require('rxjs');
 const { mergeMap, first, withLatestFrom, map,share,shareReplay, filter,mapTo,take,debounceTime,throttle,throttleTime, startWith, takeWhile, delay, scan, distinct,distinctUntilChanged, tap, flatMap, takeUntil, toArray, groupBy, concatMap} = require('rxjs/operators');
 var mqtt = require('./mqttCluster.js');
 const GROUND_FLOOR_SENSOR_TOPIC = 'zigbee2mqtt/0x00158d000566c0cc'
-const LIOVING_ROOM_SENSOR_TOPIC = 'zigbee2mqtt/0x00158d0005827a38'
+const LIOVING_ROOM_SENSOR_TOPIC = 'zigbee2mqtt/0x00156456'
 
-const KEEPLIGHTONFORSECS = parseInt(62 * 1000)
+const KEEPLIGHTONFORSECS = parseInt(20 * 1000)
 
 const groundfloorSensorStream = new Observable(async subscriber => {  
     var mqttCluster=await mqtt.getClusterAsync()   
