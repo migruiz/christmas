@@ -1,38 +1,32 @@
-const { Observable,merge } = require('rxjs');
-const { map } = require('rxjs/operators');
+const { Observable, merge } = require('rxjs');
+const { mapTo } = require('rxjs/operators');
 const CronJob = require('cron').CronJob;
 
-const START = parseInt(16)
-const END = parseInt(22)
+const SUNSET_HOUR = parseInt(16)
+const SLEEP_HOUR = parseInt(23)
 
-const endNotificationStream =  new Observable(subscriber => {      
-    new CronJob(
-        `0 ${END} * * *`,
-       function() {
-        subscriber.next({action:'off_alarm'});
-       },
-       null,
-       true,
-       'Europe/London'
-   );
-});
-const startNotificationStream =  new Observable(subscriber => {      
-    new CronJob(
-        `0 ${START} * * *`,
-       function() {
-           subscriber.next({action:'on_alarm'});
-       },
-       null,
-       true,
-       'Europe/London'
-   );
-});
 
-const dayTimeStream = merge(endNotificationStream,startNotificationStream).pipe(
-    map( (m) => {
-        if (m.action==='off_alarm') return { action:m.action, lightsTurnedOn: false}
-        if (m.action==='on_alarm') return { action:m.action, lightsTurnedOn: true}
-        }
-    )
+const everyHourStream = new Observable(subscriber => {
+    new CronJob(
+        `0 * * * *`,
+        function () {
+            subscriber.next(DateTime.now());
+        },
+        null,
+        true,
+        'Europe/Dublin'
+    );
+});
+const sharedHourStream = everyHourStream.pipe(share())
+const sleepStream = sharedHourStream.pipe(
+    filter(datetime => datetime.hour === SLEEP_HOUR),
+    mapTo({ type: 'sleep' })
 )
-module.exports.dayTimeStream =  dayTimeStream
+const sunSetStream = sharedHourStream.pipe(
+    filter(datetime => datetime.hour === SUNSET_HOUR),
+    mapTo({ type: 'sunSet' })
+)
+
+
+
+module.exports.dayTimeStream = merge(sleepStream, sunSetStream)

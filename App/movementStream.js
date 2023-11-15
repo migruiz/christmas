@@ -44,12 +44,12 @@ module.exports.getMovementStream = function(){
 
     const lightsOffStream = sensorSharedStreams.pipe(
         debounceTime(KEEPLIGHTONFORSECS),
-        mapTo('OFF'),
+        mapTo({ type: 'auto', value:'OFF' }),
         share()
         )
     const lightsOnStream = sensorSharedStreams.pipe(
         throttle(_ => lightsOffStream),
-        mapTo('ON'),
+        mapTo({ type: 'auto', value:'ON' }),
     )
     
     const movementStream = merge(lightsOnStream, lightsOffStream)
