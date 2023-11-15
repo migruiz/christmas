@@ -1,4 +1,4 @@
-const { share } = require('rxjs/operators');
+const { scan, filter } = require('rxjs/operators');
 const { Observable, merge, timer, interval, of } = require('rxjs');
 var mqtt = require('./mqttCluster.js');
 const { masterSwitchStream } = require('./currentOnOffStateStream');

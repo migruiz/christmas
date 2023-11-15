@@ -1,5 +1,5 @@
 const { Observable, merge } = require('rxjs');
-const { mapTo } = require('rxjs/operators');
+const { mapTo, share, filter } = require('rxjs/operators');
 const CronJob = require('cron').CronJob;
 
 const SUNSET_HOUR = parseInt(16)
