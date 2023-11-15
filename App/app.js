@@ -13,13 +13,13 @@ console.log(`starting xmas lights current time ${new Date()}`)
 
 
 
-const movementStream = merge(currentOnOffStream,getMovementStream({lastEmissionOnOffStream}))
+const movementStream = getMovementStream()
 
 
 
 movementStream.subscribe(async m => {   
     console.log('overall', m);
-    (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0x385b44fffee7a042/set',JSON.stringify({state:m.lightsTurnedOn?'ON':'OFF'}));
-    (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0xa4c1388e3fe8b3b1/set',JSON.stringify({state:m.lightsTurnedOn?'ON':'OFF'}));
-    (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0xa4c138b23751a6d9/set',JSON.stringify({state:m.lightsTurnedOn?'ON':'OFF'}));
+    //(await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0x385b44fffee7a042/set',{state:m});
+    (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0xa4c1388e3fe8b3b1/set',{state:m});
+    //(await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0xa4c138b23751a6d9/set',{state:m});
 })

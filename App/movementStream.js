@@ -2,7 +2,8 @@ const { Observable,merge,timer, interval, of } = require('rxjs');
 const { mergeMap, first, withLatestFrom, map,share,shareReplay, filter,mapTo,take,debounceTime,throttle,throttleTime, startWith, takeWhile, delay, scan, distinct,distinctUntilChanged, tap, flatMap, takeUntil, toArray, groupBy, concatMap} = require('rxjs/operators');
 var mqtt = require('./mqttCluster.js');
 const GROUND_FLOOR_SENSOR_TOPIC = 'zigbee2mqtt/0x00158d000566c0cc'
-const LIOVING_ROOM_SENSOR_TOPIC = 'zigbee2mqtt/0x00156456'
+const LIOVING_ROOM_SENSOR_TOPIC = 'zigbee2mqtt/0x00158d00056bad56'
+const KITCHEN_SENSOR_TOPTIC = 'zigbee2mqtt/0x142d41fffe24a424'
 
 const KEEPLIGHTONFORSECS = parseInt(20 * 60 * 1000)
 
@@ -23,29 +24,37 @@ const livingRoomSensorStream = new Observable(async subscriber => {
     });
 });
 
+const kitchenSensorStream = new Observable(async subscriber => {  
+    var mqttCluster=await mqtt.getClusterAsync()   
+    mqttCluster.subscribeData(KITCHEN_SENSOR_TOPTIC, function(content){        
+        if (content.occupancy){      
+            subscriber.next({content})
+        }
+    });
+});
 
 
 
 
 
-module.exports.getMovementStream = function({lastEmissionOnOffStream}){
 
-    const sensorSharedStreams = merge(groundfloorSensorStream, livingRoomSensorStream).pipe(share())
+module.exports.getMovementStream = function(){
+
+    const sensorSharedStreams = merge(groundfloorSensorStream, livingRoomSensorStream, kitchenSensorStream).pipe(share())
 
     const lightsOffStream = sensorSharedStreams.pipe(
         debounceTime(KEEPLIGHTONFORSECS),
-        mapTo({type:'movement_off'}),
+        mapTo('OFF'),
+        share()
         )
     const lightsOnStream = sensorSharedStreams.pipe(
-        mapTo({type:'movement_on'}),
+        throttle(_ => lightsOffStream),
+        mapTo('ON'),
     )
     
     const movementStream = merge(lightsOnStream, lightsOffStream)
 
-    return movementStream.pipe(
-        withLatestFrom(lastEmissionOnOffStream),
-        map(([movement, onOffState]) =>  ({type:movement.type, lightsTurnedOn: movement.type==='movement_on' ? onOffState.lightsTurnedOn : false})),
-    )
+    return movementStream
 
 }
 
