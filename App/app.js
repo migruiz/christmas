@@ -38,4 +38,8 @@ combinedStream.subscribe(async m => {
     (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0xa4c1388e3fe8b3b1/set', JSON.stringify({ state: m.actionState ? "ON" : "OFF" }));
     await new Promise(r => setTimeout(r, 500));//yes
     (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0x385b44fffee7a042/set', JSON.stringify({ state: m.actionState ? "ON" : "OFF" }));
+    await new Promise(r => setTimeout(r, 500));//yes
+    (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0x08fd52fffed43d71/set', JSON.stringify({ state: m.actionState ? "ON" : "OFF" }));
+    await new Promise(r => setTimeout(r, 500));//yes
+    (await mqtt.getClusterAsync()).publishMessage('zigbee2mqtt/0x20a716fffe4c0798/set', JSON.stringify({ state: m.actionState ? "ON" : "OFF" }));
 })
